@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: voxology-postgres
+    environment:
+      POSTGRES_DB: voxology
+      POSTGRES_USER: vox_user
+      POSTGRES_PASSWORD: voxology@1234
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vox_user -d voxology"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:ronmntLIVEKIT_URL=${LIVEKIT_URL}
+       LIVEKIT_API_KEY=${LIVEKIT_API_KEY}   -LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
