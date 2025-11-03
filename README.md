@@ -1,140 +1,96 @@
-# Take Home Voxology Test
+# ConversaAI
 
-  - This is a clone of https://github.com/livekit-examples/agent-starter-react to run a live voice agent with UI
-  - Run the webapp
-  - Run the https://github.com/livekit-examples/agent-starter-python python agent locally and use it in the webapp and make it running the voicemodel locally
-  - Follow instructions on how to create an account for livekit.
-  - use .env.local for all your env vars configuration.
-  - Take in the long list of provider information and make sure to optimise context so that the model can search the relevant information. The data is in the data folder in providerlist.json 
-  - Make agent tools and make the agent call it to search the providers. The tool can either search from the json directly, or do embeddings search, or use other methodologies. The goal is to retreive the exact providers based on what you ask. Example - "Can you give me any 2 providers from Oklahoma City?" or "Can you me phone numbers of doctors in Milwaukee who do general surgery?"
-  - BONUS:
-    - If you can showcase the Provider details fetched in the ui when the tool responds.
-    - Not using reasoning models so that responses are fast. 
-    - Use your imagination/research to create these workflows. 
-    - Any future plan to scale this to 1000 providers.
+ConversaAI is a small monorepo that demonstrates a voice-enabled assistant with a Next.js frontend and a Python agent backend. It integrates LiveKit for real-time voice, a PostgreSQL-backed provider database (local Postgres or Supabase), and simple provider-search tooling (JSON + optional embeddings).
 
+This repository is intended as a developer-focused starter: run the frontend UI locally, start the Python agent to handle audio/transcription/agent logic, and load provider data for search and lookup.
 
----- 
+## What you'll find here
 
-# Agent Starter for React
+- `frontend/` — Next.js app and UI components (chat, agent controls, session views).
+- `agent-starter-python/` — Python agent using LiveKit Agents, SQLAlchemy and pgvector for embeddings.
+- `data/providerlist.json` — sample provider dataset used by the loader and search tools.
 
-This is a starter template for [LiveKit Agents](https://docs.livekit.io/agents) that provides a simple voice interface using the [LiveKit JavaScript SDK](https://github.com/livekit/client-sdk-js). It supports [voice](https://docs.livekit.io/agents/start/voice-ai), [transcriptions](https://docs.livekit.io/agents/build/text/), and [virtual avatars](https://docs.livekit.io/agents/integrations/avatar).
+## Quick start
 
-Also available for:
-[Android](https://github.com/livekit-examples/agent-starter-android) • [Flutter](https://github.com/livekit-examples/agent-starter-flutter) • [Swift](https://github.com/livekit-examples/agent-starter-swift) • [React Native](https://github.com/livekit-examples/agent-starter-react-native)
+Prerequisites:
 
-<picture>
-  <source srcset="./.github/assets/readme-hero-dark.webp" media="(prefers-color-scheme: dark)">
-  <source srcset="./.github/assets/readme-hero-light.webp" media="(prefers-color-scheme: light)">
-  <img src="./.github/assets/readme-hero-light.webp" alt="App screenshot">
-</picture>
+- Node 18+ and pnpm (for the frontend)
+- Python 3.10+ and a virtual environment (for the Python agent)
 
-### Features:
-
-- Real-time voice interaction with LiveKit Agents
-- Camera video streaming support
-- Screen sharing capabilities
-- Audio visualization and level monitoring
-- Virtual avatar integration
-- Light/dark theme switching with system preference detection
-- Customizable branding, colors, and UI text via configuration
-
-This template is built with Next.js and is free for you to use or modify as you see fit.
-
-### Project structure
-
-```
-agent-starter-react/
-├── app/
-│   ├── (app)/
-│   ├── api/
-│   ├── components/
-│   ├── fonts/
-│   ├── globals.css
-│   └── layout.tsx
-├── components/
-│   ├── livekit/
-│   ├── ui/
-│   ├── app.tsx
-│   ├── session-view.tsx
-│   └── welcome.tsx
-├── hooks/
-├── lib/
-├── public/
-└── package.json
-```
-
-## Getting started
-
-> [!TIP]
-> If you'd like to try this application without modification, you can deploy an instance in just a few clicks with [LiveKit Cloud Sandbox](https://cloud.livekit.io/projects/p_/sandbox/templates/agent-starter-react).
-
-[![Open on LiveKit](https://img.shields.io/badge/Open%20on%20LiveKit%20Cloud-002CF2?style=for-the-badge&logo=external-link)](https://cloud.livekit.io/projects/p_/sandbox/templates/agent-starter-react)
-
-Run the following command to automatically clone this template.
+Frontend (development):
 
 ```bash
-lk app create --template agent-starter-react
-```
-
-Then run the app with:
-
-```bash
+cd frontend
 pnpm install
 pnpm dev
+# open http://localhost:3000
 ```
 
-And open http://localhost:3000 in your browser.
+Python agent (development):
 
-You'll also need an agent to speak with. Try our starter agent for [Python](https://github.com/livekit-examples/agent-starter-python), [Node.js](https://github.com/livekit-examples/agent-starter-node), or [create your own from scratch](https://docs.livekit.io/agents/start/voice-ai/).
-
-## Configuration
-
-This starter is designed to be flexible so you can adapt it to your specific agent use case. You can easily configure it to work with different types of inputs and outputs:
-
-#### Example: App configuration (`app-config.ts`)
-
-```ts
-export const APP_CONFIG_DEFAULTS: AppConfig = {
-  companyName: 'LiveKit',
-  pageTitle: 'LiveKit Voice Agent',
-  pageDescription: 'A voice agent built with LiveKit',
-
-  supportsChatInput: true,
-  supportsVideoInput: true,
-  supportsScreenShare: true,
-  isPreConnectBufferEnabled: true,
-
-  logo: '/lk-logo.svg',
-  accent: '#002cf2',
-  logoDark: '/lk-logo-dark.svg',
-  accentDark: '#1fd5f9',
-  startButtonText: 'Start call',
-
-  // for LiveKit Cloud Sandbox
-  sandboxId: undefined,
-  agentName: undefined,
-};
+```bash
+cd agent-starter-python
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .
+# run the agent process (see agent-starter-python/README or src/agent.py for how to start)
 ```
 
-You can update these values in [`app-config.ts`](./app-config.ts) to customize branding, features, and UI text for your deployment.
+Load provider data into Postgres (local or Supabase):
 
-> [!NOTE]
-> The `sandboxId` and `agentName` are for the LiveKit Cloud Sandbox environment.
-> They are not used for local development.
+1. Configure `agent-starter-python/.env.local` with your database URL (see examples below).
+2. From the repository root run:
 
-#### Environment Variables
-
-You'll also need to configure your LiveKit credentials in `.env.local` (copy `.env.example` if you don't have one):
-
-```env
-LIVEKIT_API_KEY=your_livekit_api_key
-LIVEKIT_API_SECRET=your_livekit_api_secret
-LIVEKIT_URL=https://your-livekit-server-url
+```bash
+./load_local_providers.sh
 ```
 
-These are required for the voice agent functionality to work with your LiveKit project.
+This script runs the Python loader which reads `data/providerlist.json`, computes embeddings, and upserts rows into Postgres.
+
+## Environment variables
+
+Keep secrets out of source control. `agent-starter-python/.gitignore` already excludes `.env*` files.
+
+Important vars for the agent (in `agent-starter-python/.env.local`):
+
+- `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` — credentials for LiveKit
+- `POSTGRES_URL` — SQLAlchemy-compatible DB URL, for example:
+
+  - Local Postgres (example):
+    `POSTGRES_URL=postgresql+psycopg://vox_user:password@localhost:5433/voxology`
+
+  - Supabase (hosted) — use URL-encoding for the password and require SSL:
+    `POSTGRES_URL=postgresql+psycopg://postgres:ENCODED_PW@db.<project-ref>.supabase.co:5432/postgres?sslmode=require`
+
+  To URL-encode a password locally (macOS / zsh):
+
+  ```bash
+  python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" 'your-raw-password'
+  ```
+
+The code in `agent-starter-python/src/database/client.py` will read `POSTGRES_URL` directly and create the SQLAlchemy engine.
+
+## Project layout (high level)
+
+```
+frontend/                 # Next.js app, UI components and configs
+agent-starter-python/     # Python agent, DB client, loader and models
+data/                     # providerlist.json sample data
+load_local_providers.sh   # helper to run the Python loader
+```
+
+## Troubleshooting
+
+- If you see DNS/`nodename nor servname provided` errors when connecting to a hosted DB, double-check your `POSTGRES_URL` host and that your machine/network can reach the host. For Supabase ensure DNS resolves and `sslmode=require` is present.
+- If authentication fails, URL-encode the password before inserting into the URL. Passwords with `@`, `:`, `/`, `#`, etc. must be percent-encoded.
+
+If you want, I can help you verify a `POSTGRES_URL` (without you pasting the raw password) by walking through the encoding step and running the loader locally.
 
 ## Contributing
 
-This template is open source and we welcome contributions! Please open a PR or issue through GitHub, and don't forget to join us in the [LiveKit Community Slack](https://livekit.io/join-slack)!
+Contributions are welcome. If you find issues or want features, open an issue or PR. Keep secrets out of commits and add reproducible steps for bugs.
+
+----
+
+License: MIT (or the license of upstream components as applicable)
